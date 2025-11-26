@@ -7,6 +7,7 @@ This file defines the rules, patterns, and guidelines that Claude Code must foll
 **MCP CloudFormation Builder** - An MCP server that generates, validates, and manages AWS CloudFormation templates with AI-powered assistance.
 
 ### Tech Stack
+
 - **Framework**: Next.js 14+ (App Router)
 - **Styling**: Tailwind CSS + shadcn/ui (ALWAYS use these for UI)
 - **Database**: Supabase (PostgreSQL)
@@ -15,6 +16,59 @@ This file defines the rules, patterns, and guidelines that Claude Code must foll
 - **Email**: Resend
 - **Deployment**: Vercel
 - **RAG**: Pinecone (vector database for knowledge retrieval)
+- **Specs**: GitHub SpecKit (REQUIRED for all new features)
+
+---
+
+## Development Workflow: SpecKit First
+
+**ALWAYS use GitHub SpecKit before implementing any new feature.**
+
+### Feature Development Process
+
+```text
+1. DISCUSS    →  2. SPEC      →  3. BUILD     →  4. SHIP
+   (Clarify)      (SpecKit)      (Implement)     (Deploy)
+```
+
+### SpecKit Requirements
+
+For every new feature:
+
+1. **Create a spec** using SpecKit before writing any code
+2. **Spec must include**:
+   - Feature description and user story
+   - API contract (endpoints, request/response)
+   - Database schema changes (if any)
+   - UI components needed
+   - Acceptance criteria
+3. **Review the spec** - Discuss and refine before implementation
+4. **Reference the spec** in commits and PRs
+
+### When to Create a Spec
+
+| Requires Spec | No Spec Needed |
+|---------------|----------------|
+| New feature | Bug fix |
+| New API endpoint | Typo fix |
+| Database schema change | Config change |
+| UI flow/page | Dependency update |
+| Integration with external service | Refactoring (same behavior) |
+
+### SpecKit Commands
+
+```bash
+# Create a new spec
+npx speckit create "feature-name"
+
+# List specs
+npx speckit list
+
+# View a spec
+npx speckit view "feature-name"
+```
+
+---
 
 ### Architecture Principle: API-First
 
