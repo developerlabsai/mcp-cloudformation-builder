@@ -6,6 +6,18 @@ This file defines the rules, patterns, and guidelines that Claude Code must foll
 
 **MCP CloudFormation Builder** - An MCP server that generates, validates, and manages AWS CloudFormation templates with AI-powered assistance.
 
+### Project Scope
+
+This project is focused on:
+
+- CloudFormation/Terraform template generation
+- Template validation and linting
+- Cost estimation for AWS resources
+- AI-powered infrastructure recommendations
+- MCP server integration for IDE/CLI tools
+
+**Out of scope:** Features unrelated to infrastructure-as-code, AWS, or the MCP protocol.
+
 ### Tech Stack
 
 - **Framework**: Next.js 14+ (App Router)
@@ -113,6 +125,74 @@ npx speckit view "feature-name"
 - **Commit early and often** - Logical, atomic commits
 - **Test after each change** - Verify before moving on
 - **Keep things working** - Don't break existing functionality
+
+### 4. Confirm Before Proceeding
+
+**For every task, follow this workflow:**
+
+1. **Understand** - Demonstrate understanding of the request by restating it
+2. **Summarize with a Plan** - Outline what will be done in clear, numbered steps
+3. **Confirm** - Wait for user approval before implementing
+
+```text
+User Request
+     ↓
+┌─────────────────┐
+│  1. UNDERSTAND  │  "I understand you want to..."
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  2. PLAN        │  "Here's my plan: 1. ... 2. ... 3. ..."
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  3. CONFIRM     │  "Does this plan look good? Ready to proceed?"
+└────────┬────────┘
+         ↓
+    (User confirms)
+         ↓
+┌─────────────────┐
+│  4. IMPLEMENT   │  Execute the plan step by step
+└─────────────────┘
+```
+
+**Never skip confirmation for:**
+
+- New features or significant changes
+- Database migrations
+- API endpoint changes
+- File deletions or major refactors
+- Deployments
+
+**Can proceed without explicit confirmation:**
+
+- Simple bug fixes with obvious solutions
+- Typo corrections
+- Answering questions (no code changes)
+
+### 5. Protect Project Scope
+
+**Before implementing any feature, verify it aligns with the project scope.**
+
+If a feature request appears to deviate from the project scope (defined in Project Overview), you MUST:
+
+1. **Flag it** - "This feature doesn't appear to be part of the project scope."
+2. **Ask why** - "Can you explain why this should be added to the MCP CloudFormation Builder?"
+3. **Confirm** - "Are you sure you want to continue with this feature?"
+4. **Document** - If approved, note in the spec why this exception was made
+
+**Questions to ask for scope-questionable features:**
+
+- "How does this relate to CloudFormation/Terraform generation?"
+- "Is this needed for the MCP server functionality?"
+- "Should this be a separate project instead?"
+
+**Examples of scope violations to flag:**
+
+- Adding user authentication unrelated to AWS
+- Building a general-purpose chat interface
+- Features for non-AWS cloud providers (unless explicitly expanding scope)
+- Social features, gamification, or unrelated SaaS functionality
 
 ---
 
@@ -295,6 +375,104 @@ Required variables (see `.env.local`):
 
 ---
 
+## Knowledge Base System
+
+This project has a **continuously growing knowledge base** at `src/lib/knowledgebase/` that stores solutions to problems discovered during development.
+
+### CRITICAL: Always Search KB First
+
+**BEFORE attempting to fix any error**, check the knowledge base:
+
+1. Read `src/lib/knowledgebase/entries.ts`
+2. Search for the error message or related keywords
+3. If a solution exists, apply it directly
+4. If no solution exists, solve the problem and ADD it to the KB
+
+### When to Search the KB
+
+Search the KB first when encountering:
+
+- Build errors or deployment failures
+- TypeScript compilation errors
+- Supabase/authentication issues
+- Next.js specific errors (especially App Router, static generation)
+- Vercel deployment problems
+- AWS SDK or CloudFormation errors
+- Any error message you've seen before
+
+### IMPORTANT: Prompt to Save Solutions & Components
+
+**After solving ANY non-trivial error or problem, ALWAYS ask:**
+
+> "Would you like me to save this solution to the knowledge base? Run `/kb-add` to capture it."
+
+**After creating ANY reusable component (UI, hook, utility, API pattern), ALWAYS ask:**
+
+> "Would you like me to save this component to the library? Run `/component-add` to register it."
+
+This ensures solutions and components are captured while the context is fresh. Don't skip these prompts!
+
+### How to Add New Solutions
+
+Use the `/kb-add` command to capture solutions interactively, OR manually add entries:
+
+After solving any non-trivial problem:
+
+1. Add a new entry to `src/lib/knowledgebase/entries.ts`
+2. Follow this format:
+
+```typescript
+{
+  id: '{category}-{number}',  // e.g., 'nextjs-003', 'aws-002'
+  category: 'nextjs' | 'supabase' | 'typescript' | 'vercel' | 'react' | 'database' | 'auth' | 'aws' | 'cloudformation' | 'general',
+  title: 'Short descriptive title',
+  problem: 'Detailed description of when this occurs',
+  errorMessages: ['exact error messages that trigger this'],
+  solution: 'Step-by-step solution',
+  codeExample: `// Working code example`,
+  relatedFiles: ['src/path/to/file.ts'],
+  tags: ['searchable', 'keywords'],
+  dateAdded: 'YYYY-MM-DD',
+}
+```
+
+### Quick Reference: Common Issues
+
+| Error | Solution | KB Entry |
+|-------|----------|----------|
+| `NODE_ENV=development` build fail | `unset NODE_ENV && npm run build` | nextjs-001 |
+| `useSearchParams() should be wrapped in suspense` | Wrap in `<Suspense>` | nextjs-002 |
+| `Your project's URL and API key are required` | Mock client pattern | supabase-001 |
+| `Parameter implicitly has 'any' type` | Explicit type annotations | typescript-001 |
+| `CredentialsProviderError` | Explicit credentials in AWS SDK | aws-001 |
+
+---
+
+## Tech Stack Reference (Updated)
+
+- **Framework**: Next.js 16 with Turbopack
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Database**: Supabase (PostgreSQL)
+- **Cloud**: AWS (CloudFormation, Pricing API, IAM)
+- **AI**: Anthropic Claude, OpenAI, Google Gemini
+- **RAG**: Pinecone
+- **Deployment**: Vercel
+
+### Build Commands
+
+```bash
+# Local build (important: unset NODE_ENV first!)
+unset NODE_ENV && npm run build
+
+# Deploy to Vercel
+vercel --prod --yes
+
+# Push database migrations
+supabase db push
+```
+
+---
+
 ## Quick Reference Commands
 
 Use these slash commands for common tasks:
@@ -304,3 +482,5 @@ Use these slash commands for common tasks:
 - `/gen-template` - Generate a CloudFormation template
 - `/validate` - Validate current template
 - `/status` - Show project status
+- `/kb-add` - Save a solution to the knowledge base
+- `/component-add` - Save a reusable component to the library
