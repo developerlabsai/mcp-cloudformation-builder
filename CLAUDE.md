@@ -8,11 +8,34 @@ This file defines the rules, patterns, and guidelines that Claude Code must foll
 
 ### Tech Stack
 - **Framework**: Next.js 14+ (App Router)
+- **Styling**: Tailwind CSS + shadcn/ui (ALWAYS use these for UI)
 - **Database**: Supabase (PostgreSQL)
 - **AI Providers**: Anthropic Claude (primary), OpenAI, Google Gemini
 - **Cloud**: AWS (CloudFormation, Pricing API, IAM)
 - **Email**: Resend
 - **Deployment**: Vercel
+- **RAG**: Pinecone (vector database for knowledge retrieval)
+
+### Architecture Principle: API-First
+
+**ALWAYS build API-first.** This means:
+
+1. **Design the API endpoint first** - Define the contract before building UI
+2. **API routes are the source of truth** - All business logic lives in `/api/` routes
+3. **Frontend consumes APIs** - UI components fetch from API endpoints, never direct DB access from client
+4. **Enable headless usage** - Every feature must be accessible via API (for MCP, CLI, integrations)
+
+```text
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Frontend  │────▶│  API Routes │────▶│  Database   │
+│  (Next.js)  │     │  /api/*     │     │  (Supabase) │
+└─────────────┘     └─────────────┘     └─────────────┘
+                           │
+                    ┌──────┴──────┐
+                    │  Services   │
+                    │  (AWS, AI)  │
+                    └─────────────┘
+```
 
 ---
 
@@ -51,17 +74,37 @@ This file defines the rules, patterns, and guidelines that Claude Code must foll
 ```
 
 ### File Organization
-```
+
+```text
 src/
-├── app/           # Next.js App Router pages and API routes
-│   └── api/       # API endpoints
-├── lib/           # Shared utilities and services
-│   ├── aws/       # AWS SDK utilities
+├── app/              # Next.js App Router pages and API routes
+│   ├── api/          # API endpoints (API-First: all business logic here)
+│   ├── (routes)/     # Page routes
+│   └── layout.tsx    # Root layout
+├── components/       # React components
+│   ├── ui/           # shadcn/ui components (Button, Card, Dialog, etc.)
+│   └── features/     # Feature-specific components
+├── lib/              # Shared utilities and services
+│   ├── aws/          # AWS SDK utilities
 │   ├── cloudformation/  # CF generation/validation
-│   ├── database/  # Supabase client
-│   └── self-healing/    # Auto-fix patterns
-└── components/    # React components (if any)
+│   ├── database/     # Supabase client
+│   ├── rag/          # Pinecone RAG utilities
+│   └── utils.ts      # General utilities (cn, etc.)
+└── hooks/            # Custom React hooks
 ```
+
+### UI Components (shadcn/ui)
+
+Always use shadcn/ui for UI components:
+
+```bash
+npx shadcn@latest add button card dialog form input
+```
+
+- Install components as needed with `npx shadcn@latest add <component>`
+- Components go in `src/components/ui/`
+- Use `cn()` utility for conditional classes
+- Follow shadcn/ui patterns for consistency
 
 ### Naming Conventions
 - **Files**: kebab-case (`pricing-utils.ts`)
